@@ -9,6 +9,8 @@ from app import app
 from flask import render_template, request, jsonify, send_file
 import os
 
+from app.forms import UploadForm
+from werkzeug.utils import secure_filename
 
 ###
 # Routing for your application.
@@ -18,6 +20,23 @@ import os
 def index():
     return jsonify(message="This is the beginning of our API")
 
+@app.route('/api/upload', methods=['POST'])
+def upload():
+    if request.method == "POST":
+        formobj = UploadForm()
+        if formobj.validate_on_submit():
+            fileobj = request.files['photo']
+            newname = secure_filename(fileobj.filename)
+            if fileobj and (newname != "" or newname != " "):
+                fileobj.save(os.path.join(app.config['UPLOAD_FOLDER'], newname))
+                feedback= {
+                    "message": "File Upload Successful",
+                    "filename": newname,
+                    "description": formobj.description.data
+                }
+                return jsonify(feedback)
+        return jsonify(form_errors(formobj))
+    return jsonify({'message': 'This is an illegal request'})
 
 ###
 # The functions below should be applicable to all Flask apps.
