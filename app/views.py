@@ -11,6 +11,7 @@ import os
 
 from app.forms import UploadForm
 from werkzeug.utils import secure_filename
+from flask_wtf.csrf import generate_csrf
 
 ###
 # Routing for your application.
@@ -36,7 +37,13 @@ def upload():
                 }
                 return jsonify(feedback)
         return jsonify(form_errors(formobj))
-    return jsonify({'message': 'This is an illegal request'})
+    return jsonify({'message': 'Bad request'})
+
+@app.route('/api/csrf-token', methods=['GET'])
+def get_csrf():
+    return jsonify({'csrf_token': generate_csrf()})           
+    
+
 
 ###
 # The functions below should be applicable to all Flask apps.
